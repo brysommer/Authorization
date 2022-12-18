@@ -5,16 +5,24 @@ const storage = multer.memoryStorage();
 const uploads = multer({ dest: 'public/img' });
 const UserModel = require('../models/user');
 const StrategiesModel = require('../models/strategies');
+const bodyParser = require('body-parser');
 
+//create user page
+router.get('/signup', (req, res) => {
+  res.render('singup')
+})
 //create user
-router.get('/createuser', async (req, res) => {
+router.post('/createuser', uploads.none(), async (req, res) => {
+  console.log(req.body);
     let userID;
     let passwordId;
     const createUser = async () => {
         const doc = await UserModel.create({
-            username: 'zhemha',
-            name: 'Ivanna',
-            surname: 'Zhemha',
+            username: req.body.username,
+            name: req.body.name,
+            surname: req.body.surname,
+            email: req.body.email,
+            phone: req.body.phone,
         });
         userID = doc.id
         console.log(doc); 
@@ -29,6 +37,7 @@ router.get('/createuser', async (req, res) => {
     };    
     createUser();
     res.send(JSON.stringify('Користувача зареєстровано id: ' + userID + 'password id: ' + passwordId))
+    
 });
 
 //authorize by passwords
@@ -50,6 +59,7 @@ router.post('/loginpass', uploads.none(), async (req, res) => {
         if (err) next(err)
         // store user information in session, typically a user id
         req.session.user = req.body.username;
+        req.session.key = req.sessionID;
         // save the session before redirection to ensure page
         // load does not happen before session is saved
         req.session.save(function (err) {
@@ -58,7 +68,7 @@ router.post('/loginpass', uploads.none(), async (req, res) => {
         })
       })
     } else {
-      console.log('Login and password doesnot fit')
+      res.send(JSON.stringify('Не вірний логін чи пароль'))
     }
   };
   checkLogin(password);
@@ -107,10 +117,16 @@ router.get('/logout', function (req, res, next) {
   })
 })
 
-
-router.get('/reply', async (req, res) => {
-    const keysList = await CommentModel.find({}).populate('reply').exec();
-    res.send(JSON.stringify(keysList));
+//delate account
+//привязати до фронту
+router.get('/delete', bodyParser.urlencoded(),  async (req, res) => {
+    console.log(req.body);
+    const deleteUser = await UserModel.deleteOne({ _id: '639dbf9a8448913049bd223f' });
+    if (deleteUser.deletedCount == 1) {
+      res.send(JSON.stringify('Ваш аккаунт видалено'));
+    } else {
+      res.send(JSON.stringify('Видалення невдале'))
+    }
 })
 
 module.exports = router;

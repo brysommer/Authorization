@@ -15,7 +15,7 @@ const generalSchema = new Schema({
     facebook: {
         type: Schema.Types.Mixed,
     }
-}, { timestamps: true });
+});
 
 const model = mongoose.model('Strategies', generalSchema);
 module.exports = model;

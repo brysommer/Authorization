@@ -7,6 +7,7 @@ const escapeHtml = require('escape-html');
 const session = require('express-session')
 const logger = require('morgan');
 
+
 let indexRouter = require('./routes/index');
 let usersRouter = require('./routes/users');
 
@@ -29,14 +30,17 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: 'mongodb://127.0.0.1:27017/autorization',
+    ttl: 3600,
     autoRemove: 'interval',
     autoRemoveInterval: 1 // In minutes. Default 10
   })
 }))
 
 // middleware to test if authenticated
-const isAuthenticated = (req, res, next) => {
-  if (req.session.user) next()
+const isAuthenticated = async (req, res, next) => {
+  if (req.session.user) {
+    next()
+  } 
   else next('route')
 }
 

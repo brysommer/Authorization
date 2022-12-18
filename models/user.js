@@ -12,6 +12,12 @@ const generalSchema = new Schema({
     surname: {
         type: Schema.Types.String,
     },
+    email: {
+        type: Schema.Types.String,
+    },
+    phone: {
+        type: Schema.Types.String,
+    }
 }, { timestamps: true });
 
 const model = mongoose.model('Users', generalSchema);
