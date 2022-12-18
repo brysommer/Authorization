@@ -1,14 +1,16 @@
-let createError = require('http-errors');
-let express = require('express');
-let path = require('path');
-let session = require('express-session')
-let logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const MongoStore = require('connect-mongo');
+const path = require('path');
+const db = require('./db');
+const escapeHtml = require('escape-html');
+const session = require('express-session')
+const logger = require('morgan');
 
 let indexRouter = require('./routes/index');
 let usersRouter = require('./routes/users');
 
 let app = express();
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -21,6 +23,31 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/css/bootstrap.css', express.static('node_modules/bootstrap/dist/css/bootstrap.css'));
 app.use('/css/bootstrap.css.map', express.static('node_modules/bootstrap/dist/css/bootstrap.css.map'));
 
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: 'mongodb://127.0.0.1:27017/autorization',
+    autoRemove: 'interval',
+    autoRemoveInterval: 1 // In minutes. Default 10
+  })
+}))
+
+// middleware to test if authenticated
+const isAuthenticated = (req, res, next) => {
+  if (req.session.user) next()
+  else next('route')
+}
+
+app.get('/', isAuthenticated,  (req, res) => {
+  console.log(req.sessionID)
+  console.log(req.session);
+  console.log('Checking autherf ' + req.session.user)
+  // this is only called when there is an authentication user due to isAuthenticated
+  res.send('hello, ' + escapeHtml(req.session.user) + '!' +
+    ' <a href="/users/logout">Logout</a>')
+})
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
