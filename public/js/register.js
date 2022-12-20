@@ -47,6 +47,6 @@ const handleFormSingIn = (event) => {
 const signInform = document.querySelector('.signup-form');
 signInform.addEventListener('submit', handleFormSingIn);
 
-const sendData = (data) => {
-	axios.post('/users/createuser', data);
+const sendData = async (data) => {
+	await axios.post('/users/createuser', data);
 }

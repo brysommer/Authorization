@@ -28,12 +28,7 @@ app.use(session({
   secret: 'keyboard cat',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: 'mongodb://127.0.0.1:27017/autorization',
-    ttl: 3600,
-    autoRemove: 'interval',
-    autoRemoveInterval: 1 // In minutes. Default 10
-  })
+  store: MongoStore.create(db),
 }))
 
 // middleware to test if authenticated
@@ -45,9 +40,9 @@ const isAuthenticated = async (req, res, next) => {
 }
 
 app.get('/', isAuthenticated,  (req, res) => {
-  console.log(req.sessionID)
-  console.log(req.session);
-  console.log('Checking autherf ' + req.session.user)
+  console.log(req.session)
+  console.log(req.session.id);
+  console.log('Checking auther ' + req.session.user)
   // this is only called when there is an authentication user due to isAuthenticated
   res.send('hello, ' + escapeHtml(req.session.user) + '!' +
     ' <a href="/users/logout">Logout</a>')

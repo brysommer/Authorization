@@ -6,13 +6,17 @@ const uploads = multer({ dest: 'public/img' });
 const UserModel = require('../models/user');
 const StrategiesModel = require('../models/strategies');
 const bodyParser = require('body-parser');
+const validMW = require('../middlewares/validation');
+const schemaRegistration = require('../validationschema/registration');
+const schemaAuthorization = require('../validationschema/localauth');
+
 
 //create user page
 router.get('/signup', (req, res) => {
   res.render('singup')
 })
 //create user
-router.post('/createuser', uploads.none(), async (req, res) => {
+router.post('/createuser', uploads.none(), validMW(schemaRegistration), async (req, res) => {
   console.log(req.body);
     let userID;
     let passwordId;
@@ -26,22 +30,22 @@ router.post('/createuser', uploads.none(), async (req, res) => {
         });
         userID = doc.id
         console.log(doc); 
-        createPassword(doc);
+        await createPassword(doc);
     };
     const createPassword = async (doc) => {
       const docpassword = await StrategiesModel.create({
           userID: doc.id,
-          password: 'password'
+          password: req.body.password,
       })
       passwordId = docpassword.id;
     };    
-    createUser();
-    res.send(JSON.stringify('Користувача зареєстровано id: ' + userID + 'password id: ' + passwordId))
+    await createUser();
+    res.json({ status: 'OK', payload: { message: `Користувача зареєстровано id: ${userID}  password id: ${passwordId}`}})
     
 });
 
-//authorize by passwords
-router.post('/loginpass', uploads.none(), async (req, res) => {
+//authorize by passwords 'local'
+router.post('/loginpass', uploads.none(), validMW(schemaAuthorization), async (req, res) => {
   const userNotFined = (dbdata) => {
     if (!data) {
       console.log('not find')
@@ -58,8 +62,11 @@ router.post('/loginpass', uploads.none(), async (req, res) => {
       req.session.regenerate(function (err) {
         if (err) next(err)
         // store user information in session, typically a user id
-        req.session.user = req.body.username;
+        req.session.user = data.username;
         req.session.key = req.sessionID;
+        req.session.userID = data._id;
+        req.session.name = data.name;
+        req.session.surname = data.surname
         // save the session before redirection to ensure page
         // load does not happen before session is saved
         req.session.save(function (err) {
@@ -84,18 +91,6 @@ router.get('/filter/:id', (req, res) => {
     res.render('index');
 });
 
-//delate user
-router.get('/json/:id', async (req, res) => {
-    const { id } = req.params;
-    let data = await PostModel.findOne({ _id: id } ).populate('keywords').populate('comments').exec();
-    let promises = 
-    data.comments.map(async element => {  
-        return await CommentModel.findOne({ _id: element._id }).populate('reply')       
-    });
-    const result = await Promise.all(promises);
-    data.comments = result;    
-    res.send(JSON.stringify(data)); 
-});
 
 //Logout
 router.get('/logout', function (req, res, next) {
@@ -123,9 +118,9 @@ router.get('/delete', bodyParser.urlencoded(),  async (req, res) => {
     console.log(req.body);
     const deleteUser = await UserModel.deleteOne({ _id: '639dbf9a8448913049bd223f' });
     if (deleteUser.deletedCount == 1) {
-      res.send(JSON.stringify('Ваш аккаунт видалено'));
+      res.json('Ваш аккаунт видалено');
     } else {
-      res.send(JSON.stringify('Видалення невдале'))
+      res.json('Видалення невдале');
     }
 })
 

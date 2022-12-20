@@ -1,19 +1,13 @@
 (function($) {
-
 	"use strict";
-
 	var fullHeight = function() {
-
 		$('.js-fullheight').css('height', $(window).height());
 		$(window).resize(function(){
 			$('.js-fullheight').css('height', $(window).height());
 		});
-
 	};
 	fullHeight();
-
 	$(".toggle-password").click(function() {
-
 	  $(this).toggleClass("fa-eye fa-eye-slash");
 	  var input = $($(this).attr("toggle"));
 	  if (input.attr("type") == "password") {
@@ -22,7 +16,6 @@
 	    input.attr("type", "password");
 	  }
 	});
-
 })(jQuery);
 /*
 const passEyes = document.querySelector('.toggle-password');
@@ -42,11 +35,11 @@ const handleFormSingIn = (event) => {
 	event.preventDefault()
 	const data = serializeForm(signInform);
 	sendData(data);
-  }
+}
   
 const signInform = document.querySelector('.signin-form');
 signInform.addEventListener('submit', handleFormSingIn);
 
-const sendData = (data) => {
-	axios.post('/users/loginpass', data);
+const sendData = async (data) => {
+	await axios.post('/users/loginpass', data);
 }

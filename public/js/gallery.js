@@ -1,4 +1,5 @@
-/*	gallery */
+
+/*	gallery *//*
 $(document).ready(function(){
     $(".filter-button").click(function(){
         var value = $(this).attr('data-filter');
@@ -17,6 +18,16 @@ $(document).ready(function(){
 		    	$(this).addClass("active");
 	    	});
 });
+*/
+const filterButton = document.querySelectorAll('.filter-button');
+console.log(filterButton)
+filterButton.forEach((element) => {
+    addEventListener('click', (event) => {
+        let value = event.target.data-filter;
+        console.log(value);
+    })
+})
+
 /*	end gallery */
 
 $(document).ready(function(){
